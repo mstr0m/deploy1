@@ -5,10 +5,6 @@ locals {
     private_key_path = "/home/mikestrommgmail/.ssh/aws-rsa"
 }
 
-provider "aws" {
-  region = local.region
-}
-
 resource "aws_security_group" "nginx" {
   name = "nginx_access"
   ingress {
