@@ -5,11 +5,15 @@
 - name: Set modeprob netfilter
   shell: modprobe br_netfilter
 
-- name: Get k8s repo
-  shell: echo 'deb http://apt.kubernetes.io/ kubernetes-xenial main' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+- name: Add k8s GPG apt Key
+  apt_key:
+    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    state: present
 
-- name: Set k8s repo
-  shell: curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+- name: Add k8s Repository
+  apt_repository:
+    repo: deb http://apt.kubernetes.io/ kubernetes-xenial main
+    state: present
 
 - name: Install k8s
   apt:
