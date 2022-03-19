@@ -1,0 +1,9 @@
+---
+- name: Setup k8s master
+  hosts: all
+  remote_user: ubuntu
+  become: yes
+
+  roles:
+  - docker
+  - k8s

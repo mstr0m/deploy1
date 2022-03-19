@@ -11,8 +11,8 @@ resource "aws_key_pair" "deployer" {
   public_key = file(local.public_key_path)
 }
 
-resource "aws_security_group" "nginx" {
-  name = "nginx_access"
+resource "aws_security_group" "k8s" {
+  name = "k8s"
   ingress {
     from_port = 22
     to_port = 22
@@ -20,9 +20,9 @@ resource "aws_security_group" "nginx" {
     cidr_blocks = ["0.0.0.0/0"]
   }
   ingress {
-    from_port = 80
-    to_port = 80
-    protocol = "tcp"
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
   egress {
@@ -33,32 +33,60 @@ resource "aws_security_group" "nginx" {
   }
 }
 
-resource "aws_instance" "nginx" {
+resource "aws_instance" "k8s-master" {
   ami = "ami-04505e74c0741db8d"
-  instance_type = "t2.micro"
-  vpc_security_group_ids = [aws_security_group.nginx.id]
+  count = 1
+  instance_type = "t2.medium"
+  vpc_security_group_ids = [aws_security_group.k8s.id]
   key_name = local.key_name
   tags = {
-     Name = "nginx"
+     Name = "k8s"
+     Role = "master"
   }
 
   provisioner "remote-exec" {
     inline = ["echo 'SSH is up!'"]
     connection {
+      host = "${self.public_ip}"
       type = "ssh"
       user = local.ssh_user
       private_key = file(local.private_key_path)
-      host = aws_instance.nginx.public_ip
-      timeout = "4m"
     }
   }
 
   provisioner "local-exec" {
     working_dir = "${path.module}/../ansible/"
-    command = "ansible-playbook -i ${aws_instance.nginx.public_ip}, --private-key ${local.private_key_path} nginx.yaml"
+    command = "ansible-playbook -i ${self.public_ip}, --private-key ${local.private_key_path} master.yaml"
   }
 }
 
-output "nginx_public_ip" {
-  value = aws_instance.nginx.public_ip
+resource "aws_instance" "k8s-worker" {
+  ami = "ami-04505e74c0741db8d"
+  count = 2
+  instance_type = "t2.medium"
+  vpc_security_group_ids = [aws_security_group.k8s.id]
+  key_name = local.key_name
+  tags = {
+     Name = "k8s"
+     Role = "worker"
+  }
+
+  provisioner "remote-exec" {
+    inline = ["echo 'SSH is up!'"]
+    connection {
+      host = "${self.public_ip}"
+      type = "ssh"
+      user = local.ssh_user
+      private_key = file(local.private_key_path)
+    }
+  }
+
+  provisioner "local-exec" {
+    working_dir = "${path.module}/../ansible/"
+    command = "ansible-playbook -i ${self.public_ip}, --private-key ${local.private_key_path} worker.yaml"
+  }
+}
+
+output "k8s-master_public_ip" {
+  value = aws_instance.k8s-master.public_ip
 }

@@ -1,0 +1,22 @@
+---
+- name: Set modeprob overlay
+  shell: "modprobe overlay"
+
+- name: Set modeprob netfilter
+  shell: "modprobe br_netfilter"
+
+- name: Get k8s repo
+  shell: "echo 'deb http://apt.kubernetes.io/ kubernetes-xenial main' | sudo tee /etc/apt/sources.list.d/kubernetes.list"
+
+- name: Set k8s repo
+  shell: "curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -"
+
+- name: Install k8s
+  apt:
+    name: '{{item}}'
+    state: latest
+    update_cache: yes
+  with_items:
+    - kubelet=1.20.1-00
+    - kubeadm=1.20.1-00
+    - kubectl=1.20.1-00  

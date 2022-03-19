@@ -1,8 +1,9 @@
 ---
-- name: Install nginx
+- name: Setup k8s master
   hosts: all
   remote_user: ubuntu
   become: yes
 
   roles:
-  - nginx
+  - docker
+  - k8s
