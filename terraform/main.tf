@@ -3,6 +3,12 @@ locals {
     ssh_user = "ubuntu"
     key_name = "aws-rsa"
     private_key_path = "/home/mikestrommgmail/.ssh/aws-rsa"
+    public_key_path = "/home/mikestrommgmail/.ssh/aws-rsa.pub"
+}
+
+resource "aws_key_pair" "deployer" {
+  key_name   = local.key_name
+  public_key = file(local.public_key_path)
 }
 
 resource "aws_security_group" "nginx" {
@@ -30,28 +36,26 @@ resource "aws_security_group" "nginx" {
 resource "aws_instance" "nginx" {
   ami = "ami-04505e74c0741db8d"
   instance_type = "t2.micro"
-  security_groups = [aws_security_group.nginx.id]
+  vpc_security_group_ids = [aws_security_group.nginx.id]
   key_name = local.key_name
   tags = {
      Name = "nginx"
   }
 
   provisioner "remote-exec" {
-    inline = ["echo 'Wating for SSH to come up'"]
+    inline = ["echo 'SSH is up!'"]
     connection {
       type = "ssh"
       user = local.ssh_user
       private_key = file(local.private_key_path)
       host = aws_instance.nginx.public_ip
+      timeout = "4m"
     }
   }
 
   provisioner "local-exec" {
-    command = <<EOT
-        "ansible-playbook -i ${aws_instance.nginx.public_ip},
-        --private-key ${local.private_key_path}
-        ./ansible/nginx.yaml"
-    EOT
+    working_dir = "${path.module}/../ansible/"
+    command = "ansible-playbook -i ${aws_instance.nginx.public_ip}, --private-key ${local.private_key_path} nginx.yaml"
   }
 }
 
