@@ -46,7 +46,7 @@ resource "aws_instance" "nginx" {
     }
   }
 
-  provisioner "locel-exec" {
+  provisioner "local-exec" {
     command = <<EOT
         "ansible-playbook -i ${aws_instance.nginx.public_ip},
         --private-key ${local.private_key_path}
