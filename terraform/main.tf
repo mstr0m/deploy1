@@ -30,7 +30,7 @@ resource "aws_security_group" "nginx" {
 resource "aws_instance" "nginx" {
   ami = "ami-04505e74c0741db8d"
   instance_type = "t2.micro"
-  security_groups = [aws_security_group.nginx_access.id]
+  security_groups = [aws_security_group.nginx.id]
   key_name = local.key_name
   tags = {
      Name = "nginx"
