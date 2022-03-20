@@ -1,3 +1,9 @@
 ---
-- name: Joining to the cluster
+- name: Check if kubelet.conf exists
+  stat:
+    path: "/etc/kubernetes/kubelet.conf"
+  register: kubelet_conf
+
+- name: Joining to the cluster if needed
   shell: "{{ hostvars['k8s_master']['k8s_join_command'] }}"
+  when: not kubelet_conf.stat.exists
