@@ -11,7 +11,7 @@ Test deployment of an k8s app in AWS using terrfarom and ansible.
         region = "xxxx"  
     }
 
-3. Set pathto  ssh key pair from step 1 in main.tf  
+3. Set path to  ssh key pair from step 1 in main.tf  
     private_key_path = "/home/xxxx/.ssh/xxxx"  
     public_key_path = "/home/xxxx/.ssh/xxxx.pub"  
 
