@@ -28,7 +28,7 @@
   shell: kubeadm token create --print-join-command
   register: join_command
  
-- name: Setting join command
+- name: Setting join command for k8s_worker role
   add_host:
     name: k8s_master
     k8s_join_command: "{{ join_command.stdout }}"
