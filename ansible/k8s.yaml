@@ -1,0 +1,25 @@
+---
+- name: Install docker and k8s
+  hosts: all
+  remote_user: ubuntu
+  become: yes
+
+  roles:
+  - docker
+  - k8s
+
+- name: Configure k8s master
+  hosts: k8s_masters
+  remote_user: ubuntu
+  become: yes
+
+  roles:
+  - k8s_master
+
+- name: Configure k8s workers
+  hosts: k8s_workers
+  remote_user: ubuntu
+  become: yes
+
+  roles:
+  - k8s_worker

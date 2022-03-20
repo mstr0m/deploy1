@@ -1,0 +1,27 @@
+---
+- name: Initializing the kubernetes cluster on the master node…
+  shell: kubeadm init --pod-network-cidr=10.244.0.0/16
+
+- name: Creating .kube directory
+  file:
+  path: $HOME/.kube
+  state: directory
+  mode: 0755
+
+- name: Configuring users cluster access
+  copy:
+    src: /etc/kubernetes/admin.conf
+    dest: /home/ubuntu/.kube/config
+    remote_src: yes
+    owner: ubuntu
+
+- name: Installing Pod network…. (Flannel)
+  shell: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+
+- name: Getting join command from the master node…
+  shell: kubeadm token create --print-join-command
+  register: join_command
+ 
+- name: Setting join command…
+  set_fact:
+    join_command: “{{ join_command.stdout_lines[0] }}”

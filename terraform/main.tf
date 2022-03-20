@@ -54,10 +54,10 @@ resource "aws_instance" "k8s-master" {
     }
   }
 
-  provisioner "local-exec" {
-    working_dir = "${path.module}/../ansible/"
-    command = "ansible-playbook -i ${self.public_ip}, --private-key ${local.private_key_path} master.yaml"
-  }
+  # provisioner "local-exec" {
+  #   working_dir = "${path.module}/../ansible/"
+  #   command = "ansible-playbook -i ${self.public_ip}, --private-key ${local.private_key_path} master.yaml"
+  # }
 }
 
 resource "aws_instance" "k8s-worker" {
@@ -81,10 +81,22 @@ resource "aws_instance" "k8s-worker" {
     }
   }
 
-  provisioner "local-exec" {
-    working_dir = "${path.module}/../ansible/"
-    command = "ansible-playbook -i ${self.public_ip}, --private-key ${local.private_key_path} worker.yaml"
-  }
+  # provisioner "local-exec" {
+  #   working_dir = "${path.module}/../ansible/"
+  #   command = "ansible-playbook -i ${self.public_ip}, --private-key ${local.private_key_path} worker.yaml"
+  # }
+}
+
+# generate inventory file for Ansible
+resource "local_file" "inventory" {
+  content = templatefile("${path.module}/templates/inventory.tpl",
+    {
+      k8s_masters = aws_instance.k8s-master.*.public_ip
+      k8s_workers = aws_instance.k8s-worker.*.public_ip
+      private_key_path = local.private_key_path
+    }
+  )
+  filename = "../ansible/inventory"
 }
 
 output "k8s-master_public_ip" {
