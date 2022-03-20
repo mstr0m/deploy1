@@ -3,7 +3,7 @@ k8s_masters
 k8s_workers
 
 [k8s_masters]
-3.83.214.149
+18.212.13.195
 
 [k8s_workers]
 54.161.106.93
