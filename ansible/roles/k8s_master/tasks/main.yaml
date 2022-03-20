@@ -4,7 +4,7 @@
 
 - name: Creating .kube directory
   file:
-    path: $HOME/.kube
+    path: /home/root/.kube
     state: directory
     mode: 0755
 
